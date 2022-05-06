@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}
+main page
+{% endblock title %}
+
+{% block css %}
+<style>
+  .red {
+    color: red;
+  }
+
+  .green {
+    color: green;
+  }
+
+  .table-container {
+    overflow-x: scroll;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope='col'>Logo</th>
+                <th scope='col'>Name</th>
+                <th scope='col'>Rank</th>
+                <th scope='col'>Market cap</th>
+                <th scope='col'>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if data %}
+                {% for obj in data %}
+                    <tr>
+                        <td><img src={{obj.image}} height='70'></td>
+                        <td id={{obj.name}} class="align-middle">{{obj.name}}</td>
+                        <td id={{obj.name}}_market_cap_rank class="align-middle">{{obj.market_cap_rank}}</td>
+                        <td id={{obj.name}}_market_cap class="align-middle">{{obj.market_cap}}</td>
+                        <td id={{obj.name}}_current_price class="align-middle">{{obj.current_price}}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <h3>Nothing here...</h3>
+            {% endif %}
+        </tbody>
+
+    </table>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    var socket = new WebSocket("ws://localhost:8000/ws/update/");
+
+    function update_data(item){
+        var x =  document.getElementById(`${item['name']}_market_cap_rank`);
+        var y =  document.getElementById(`${item['name']}_market_cap`);
+        var z =  document.getElementById(`${item['name']}_current_price`);
+        if(x)
+            x.innerHTML = item['market_cap_rank'];
+        if(y)
+            y.innerHTML = item['market_cap'];  
+        if(z){
+            var ch3 = item['current_price'] - z.innerHTML;
+            if(ch3>0){
+                z.className = "align-middle green";
+                z.innerHTML = item['current_price'];
+            }
+            else{
+                z.className = "align-middle red";
+                z.innerHTML = item['current_price'];
+            }
+        }
+    }
+
+    socket.onmessage = function(event){
+        console.log(event.data);
+        const data = JSON.parse(event.data);
+        for(const val of data){
+           update_data(val);
+        }        
+    }
+</script>
+{% endblock scripts %}
