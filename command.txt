@@ -1,0 +1,3 @@
+CELERY_WORKER_CMD: celery -A CryptoApp.celery worker --pool=solo -l info
+CELERY BEAT CMD: celery -A CryptoApp.celery beat -l info
+PYTHON SERVER STARTING CMD: python .\manage.py runserver
